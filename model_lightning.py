@@ -5,10 +5,10 @@ import pytorch_lightning as pl
 
 class ParametrizedCNNLightning(pl.LightningModule):
     def __init__(self,
-                 conv_channels=[32, 64],
+                 conv_channels=[64, 64],
                  fc_layers=[512],
                  dropout=0.5,
-                 num_classes=100,
+                 num_classes=10,
                  lr=1e-3):
         super().__init__()
         self.save_hyperparameters()
@@ -45,13 +45,6 @@ class ParametrizedCNNLightning(pl.LightningModule):
         outputs = self(inputs)
         loss = F.cross_entropy(outputs, targets)
         self.log('train_loss', loss)
-        return loss
-    
-    def validation_step(self, batch, batch_idx):
-        inputs, targets = batch
-        outputs = self(inputs)
-        loss = F.cross_entropy(outputs, targets)
-        self.log('val_loss', loss)
         return loss
     
     def configure_optimizers(self):
