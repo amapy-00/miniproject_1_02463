@@ -7,7 +7,7 @@ class ParametrizedCNNLightning(pl.LightningModule):
     def __init__(self,
                  base_channels=32,
                  dropout=0.5,
-                 num_classes=100,
+                 num_classes=10,
                  lr=1e-3):
         super().__init__()
         self.save_hyperparameters()
