@@ -50,13 +50,6 @@ class ParametrizedCNNLightning(pl.LightningModule):
         self.log('train_loss', loss)
         return loss
     
-    def validation_step(self, batch, batch_idx):
-        inputs, targets = batch
-        outputs = self(inputs)
-        loss = F.cross_entropy(outputs, targets)
-        self.log('val_loss', loss)
-        return loss
-    
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.hparams.lr)
         return optimizer

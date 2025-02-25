@@ -10,8 +10,6 @@ def train_model(params, num_epochs=10, n_training_samples=1000):
         param_names = [
             'module__base_channels',
             'module__dropout',
-            'lr',
-            'batch_size'
         ]
         params = dict(zip(param_names, params))
     
@@ -54,4 +52,3 @@ def train_model(params, num_epochs=10, n_training_samples=1000):
     accuracy = correct / total
     return accuracy
 
-# ...existing code or tests...
