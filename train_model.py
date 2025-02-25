@@ -5,19 +5,17 @@ import torchvision
 import torchvision.transforms as transforms
 
 def train_model(params, num_epochs=10, n_training_samples=1000):
-    # Extract model hyperparameters (keys starting with 'module__')
-    # If params is a list (as provided by skopt), convert it to a dictionary using the known parameter order.
+    # If params is a list (from skopt), convert it to a dictionary using the known parameter order.
     if not isinstance(params, dict):
         param_names = [
-            'module__conv_channels',
-            'module__fc_layers',
+            'module__base_channels',
             'module__dropout',
             'lr',
             'batch_size'
         ]
         params = dict(zip(param_names, params))
     
-    # Extract model hyperparameters (keys starting with 'module__') and remove the prefix.
+    # Extract model hyperparameters.
     model_params = {k.replace('module__', ''): v for k, v in params.items() if k.startswith('module__')}
     # Extract training parameters directly.
     lr = params.get('lr', 1e-3)

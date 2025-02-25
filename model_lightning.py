@@ -5,13 +5,16 @@ import pytorch_lightning as pl
 
 class ParametrizedCNNLightning(pl.LightningModule):
     def __init__(self,
-                 conv_channels=[32, 64],
-                 fc_layers=[512],
+                 base_channels=32,
                  dropout=0.5,
                  num_classes=100,
                  lr=1e-3):
         super().__init__()
         self.save_hyperparameters()
+        # Configure conv and fc parameters based on a single base_channels value.
+        conv_channels = [base_channels, base_channels * 2]
+        fc_layers = [base_channels * 8]
+        
         layers = []
         in_channels = 3  # CIFAR100 images have 3 channels
         # Fixed conv parameters: kernel=3, stride=1, padding=1, pooling kernel=2
