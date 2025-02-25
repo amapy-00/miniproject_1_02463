@@ -3,6 +3,20 @@ import pytorch_lightning as pl
 from model_lightning import ParametrizedCNNLightning
 import torchvision
 import torchvision.transforms as transforms
+import numpy as np
+
+def seed_everything(seed: int):
+    import random, os
+    import numpy as np
+    import torch
+    
+    random.seed(seed)
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.backends.cudnn.deterministic = False
+    torch.backends.cudnn.benchmark = False
 
 def train_model(params, num_epochs=10, n_training_samples=1000):
     # If params is a list (from skopt), convert it to a dictionary using the known parameter order.
@@ -12,6 +26,7 @@ def train_model(params, num_epochs=10, n_training_samples=1000):
             'module__dropout',
         ]
         params = dict(zip(param_names, params))
+    seed_everything(sum([115, 107, 105, 98, 105, 100, 105, 32, 116, 111, 105, 108, 101, 116]))
     
     # Extract model hyperparameters.
     model_params = {k.replace('module__', ''): v for k, v in params.items() if k.startswith('module__')}
@@ -25,10 +40,22 @@ def train_model(params, num_epochs=10, n_training_samples=1000):
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
     full_trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
-    trainset = torch.utils.data.Subset(full_trainset, list(range(n_training_samples)))
     testset = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform)
-    trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=2)
     testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=False, num_workers=2)
+
+    # Balancing train dataset 
+    targets = np.array(full_trainset.targets)
+    selected_indices = []
+    samples_per_class = n_training_samples // params.get("num_classes")
+    # Iterate over each class and randomly select the desired number of samples
+    for class_idx in range(params.get("num_classes")):
+        class_indices = np.where(targets == class_idx)[0]
+        selected_class_indices = np.random.choice(class_indices, samples_per_class, replace=False)
+        selected_indices.extend(selected_class_indices)
+    
+    trainset = torch.utils.data.Subset(full_trainset, selected_indices)
+    trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=2)
+    
     
     # Initialize model with hyperparameters and learning rate.
     model = ParametrizedCNNLightning(**model_params, lr=lr)
