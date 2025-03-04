@@ -46,13 +46,14 @@ def train_model(params, num_epochs=10, n_training_samples=1000):
     # Balancing train dataset 
     targets = np.array(full_trainset.targets)
     selected_indices = []
-    samples_per_class = n_training_samples // params.get("num_classes")
+    NUM_CLASSES = 10
+    samples_per_class = n_training_samples // NUM_CLASSES
     # Iterate over each class and randomly select the desired number of samples
-    for class_idx in range(params.get("num_classes")):
+    for class_idx in range(NUM_CLASSES):
         class_indices = np.where(targets == class_idx)[0]
         selected_class_indices = np.random.choice(class_indices, samples_per_class, replace=False)
         selected_indices.extend(selected_class_indices)
-    
+        
     trainset = torch.utils.data.Subset(full_trainset, selected_indices)
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=2)
     
